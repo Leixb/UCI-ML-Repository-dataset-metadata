@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"strings"
 
 	"log"
 	"os"
@@ -93,17 +92,4 @@ func has_missing_values(attributes []Attribute) bool {
 		}
 	}
 	return false
-}
-
-func NormalizeName(name string) string {
-	// Remove all non-alphanumeric characters
-	result := ""
-	for _, c := range name {
-		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
-			result += "_"
-		} else {
-			result += string(c)
-		}
-	}
-	return strings.ToLower(result)
 }

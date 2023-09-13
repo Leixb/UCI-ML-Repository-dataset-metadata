@@ -171,9 +171,28 @@ func (d *Dataset) AttrsAreAllOK() bool {
 	return true
 }
 
+func (d *Dataset) NeedsCoercion() bool {
+	for _, attr := range d.Attributes {
+		if attr.Type != "Continuous" {
+			return true
+		}
+	}
+	return false
+}
+
+func (d *Dataset) CoerceAttrs() []Attribute {
+	result := make([]Attribute, 0, len(d.Attributes))
+	for _, attr := range d.Attributes {
+		if attr.Type != "Continuous" {
+			result = append(result, attr)
+		}
+	}
+	return result
+}
+
 func (d *Dataset) Toml(out io.Writer) {
-	template_file := "metadata_template.toml"
-	t := template.Must(template.New(template_file).ParseFiles(template_file))
+	template_file := "templates/metadata.toml"
+	t := template.Must(template.New("metadata.toml").ParseFiles(template_file))
 	err := t.Execute(out, d)
 	if err != nil {
 		panic(err)
@@ -181,10 +200,23 @@ func (d *Dataset) Toml(out io.Writer) {
 }
 
 func (d *Dataset) Julia(out io.Writer) {
-	template_file := "julia_template.jl"
-	t := template.Must(template.New(template_file).ParseFiles(template_file))
+	template_file := "templates/datasets.jl"
+	t := template.Must(template.New("datasets.jl").ParseFiles(template_file))
 	err := t.Execute(out, d)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func NormalizeName(name string) string {
+	// Remove all non-alphanumeric characters
+	result := ""
+	for _, c := range name {
+		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
+			result += "_"
+		} else {
+			result += string(c)
+		}
+	}
+	return strings.ToLower(result)
 }
