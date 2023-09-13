@@ -29,6 +29,7 @@ func main() {
 
 	attr_types := make(map[string]int)
 	attr_roles := make(map[string]int)
+	tasks := make(map[string]int)
 
 	missing_values := 0
 
@@ -38,12 +39,20 @@ func main() {
 	}
 	defer out.Close()
 
+	out_jl, err := os.Create("test.jl")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer out_jl.Close()
+
 	for dec.More() {
 		var d Dataset
 		if err := dec.Decode(&d); err != nil {
 			log.Fatal(err)
 		}
 		println(d.ID, d.Name, d.DateDonated.Year, d.YearCreated)
+
+		tasks[d.Task] += 1
 
 		for _, attr := range d.Attributes {
 			attr_types[attr.Type] += 1
@@ -54,7 +63,9 @@ func main() {
 			missing_values += 1
 		}
 
-		d.print_toml(out)
+		d.Toml(out)
+
+		d.Julia(out_jl)
 	}
 
 	log.Println("Types:")
@@ -64,6 +75,10 @@ func main() {
 
 	log.Println("Roles:")
 	for k, v := range attr_roles {
+		log.Println(k, v)
+	}
+	log.Println("Tasks:")
+	for k, v := range tasks {
 		log.Println(k, v)
 	}
 
@@ -80,7 +95,7 @@ func has_missing_values(attributes []Attribute) bool {
 	return false
 }
 
-func normalize_name(name string) string {
+func NormalizeName(name string) string {
 	// Remove all non-alphanumeric characters
 	result := ""
 	for _, c := range name {

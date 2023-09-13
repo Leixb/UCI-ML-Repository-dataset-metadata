@@ -1,0 +1,14 @@
+################################################################################
+[{{.NormSlug}}]
+url = "{{.ZipURL}}"
+sha256 = ""
+
+[{{.NormSlug}}.meta]
+title = "{{.Name}}"
+description = "{{.Abstract}}"
+doi = "{{.DOI}}"
+kind = "{{.Types}}"
+year = {{.YearCreated}}
+home = "{{.HomeURL}}"
+family = "{{.Area}}"
+

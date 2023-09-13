@@ -4,7 +4,11 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"strings"
+	"text/template"
 	"time"
+
+	"github.com/iancoleman/strcase"
 )
 
 const BASE_URL = "https://archive.ics.uci.edu"
@@ -105,7 +109,7 @@ type Dataset struct {
 	User User `json:"user"`
 }
 
-func (dataset *Dataset) zip_url() string {
+func (dataset *Dataset) ZipURL() string {
 	if dataset.URLLink != "" {
 		return dataset.URLLink
 	}
@@ -114,24 +118,73 @@ func (dataset *Dataset) zip_url() string {
 	return link.JoinPath("static", "public", fmt.Sprint(dataset.ID), fmt.Sprintf("%s.zip", dataset.Slug)).String()
 }
 
-func (dataset *Dataset) home_url() string {
+func (dataset *Dataset) HomeURL() string {
 	link, _ := url.Parse(BASE_URL)
 	return link.JoinPath("dataset", fmt.Sprint(dataset.ID), dataset.Slug).String()
 }
 
-// Print the dataset metadata in TOML format.
-func (dataset *Dataset) print_toml(io io.Writer) {
-	key := normalize_name(dataset.Slug)
-	fmt.Fprintf(io, "[%s]\n", key)
-	fmt.Fprintf(io, "url = %q\n", dataset.zip_url())
-	fmt.Fprintf(io, "sha256 = \"\"\n")
-	fmt.Fprintf(io, "[%s.meta]\n", key)
-	fmt.Fprintf(io, "title = %q\n", dataset.Name)
-	fmt.Fprintf(io, "description = %q\n", dataset.Abstract)
-	fmt.Fprintf(io, "doi = %q\n", dataset.DOI)
-	fmt.Fprintf(io, "kind = %q\n", dataset.Types)
-	fmt.Fprintf(io, "year = %d\n", dataset.YearCreated)
-	fmt.Fprintf(io, "home = %q\n", dataset.home_url())
-	fmt.Fprintf(io, "family = %q\n", dataset.Area)
-	fmt.Fprintln(io)
+func (dataset *Dataset) NormSlug() string {
+	return NormalizeName(dataset.Slug)
+}
+
+func (d *Dataset) Camel() string {
+	return strcase.ToCamel(d.Name)
+}
+
+func (d *Dataset) Target() string {
+	for _, attr := range d.Attributes {
+		if attr.Role == "Target" {
+			return attr.Name
+		}
+	}
+	// last attribute name
+	idx := len(d.Attributes) - 1
+	if idx < 0 {
+		return ""
+	}
+	last := d.Attributes[len(d.Attributes)-1].Name
+	if last == "" || last == " " {
+		return fmt.Sprintf("Column%d", idx+1)
+	}
+	return last
+}
+
+func (d *Dataset) TaskName() string {
+	if strings.Contains(d.Task, "Regression") {
+		return "Regression"
+	}
+	if strings.Contains(d.Task, "Classification") {
+		return "Classification"
+	}
+	return "Other"
+}
+
+func (d *Dataset) AttrsAreAllOK() bool {
+	if len(d.Attributes) == 0 {
+		return false
+	}
+	for _, attr := range d.Attributes {
+		if attr.Name == "" || attr.Type == "" || attr.Name == " " || attr.Type == " " {
+			return false
+		}
+	}
+	return true
+}
+
+func (d *Dataset) Toml(out io.Writer) {
+	template_file := "metadata_template.toml"
+	t := template.Must(template.New(template_file).ParseFiles(template_file))
+	err := t.Execute(out, d)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (d *Dataset) Julia(out io.Writer) {
+	template_file := "julia_template.jl"
+	t := template.Must(template.New(template_file).ParseFiles(template_file))
+	err := t.Execute(out, d)
+	if err != nil {
+		panic(err)
+	}
 }
