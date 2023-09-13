@@ -21,4 +21,6 @@
 go.work
 
 .pre-commit-config.yaml
-metadata.toml
+*.toml
+*.jl
+!templates/*
