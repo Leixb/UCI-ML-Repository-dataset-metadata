@@ -28,6 +28,7 @@
             golint
             python3.pkgs.grip
             nixpkgs-fmt
+            jq
           ];
 
           inherit (self.checks.${system}.pre-commit-check) shellHook;
