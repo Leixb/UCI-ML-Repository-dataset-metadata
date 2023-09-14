@@ -12,8 +12,7 @@
 {{if and .AttrsAreAllOK .NeedsCoercion}}
 preprocess(ds::{{.Name}}) = X -> coerce(X, {{range .CoerceAttrs}}
     :{{.Name}} => {{.Type}}, {{end}}
-)
-{{end}}
+){{end}}
 
 url(::{{.Name}}) = "{{.HomeURL}}"
 doi(::{{.Name}}) = "{{.DOI}}"

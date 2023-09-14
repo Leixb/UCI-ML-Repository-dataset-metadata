@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"log"
 	"os"
@@ -38,11 +39,14 @@ func main() {
 	}
 	defer out.Close()
 
-	out_jl, err := os.Create("test.jl")
+	out_jl, err := os.Create("datasets.jl")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer out_jl.Close()
+
+	fmt.Fprint(out, "#", "!!! This file was auto-generated.\n\n")
+	fmt.Fprint(out_jl, "#", "!!! This file was auto-generated.\n\n")
 
 	for dec.More() {
 		var d Dataset
@@ -62,9 +66,15 @@ func main() {
 			missing_values += 1
 		}
 
-		d.Toml(out)
+		err = d.Toml(out)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		d.Julia(out_jl)
+		err = d.Julia(out_jl)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	log.Println("Types:")

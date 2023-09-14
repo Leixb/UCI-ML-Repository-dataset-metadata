@@ -190,22 +190,16 @@ func (d *Dataset) CoerceAttrs() []Attribute {
 	return result
 }
 
-func (d *Dataset) Toml(out io.Writer) {
-	template_file := "templates/metadata.toml"
-	t := template.Must(template.New("metadata.toml").ParseFiles(template_file))
-	err := t.Execute(out, d)
-	if err != nil {
-		panic(err)
-	}
+var metadataTemplate = template.Must(template.New("metadata.toml").ParseFiles("templates/metadata.toml"))
+
+func (d *Dataset) Toml(out io.Writer) error {
+	return metadataTemplate.Execute(out, d)
 }
 
-func (d *Dataset) Julia(out io.Writer) {
-	template_file := "templates/datasets.jl"
-	t := template.Must(template.New("datasets.jl").ParseFiles(template_file))
-	err := t.Execute(out, d)
-	if err != nil {
-		panic(err)
-	}
+var juliaTemplate = template.Must(template.New("datasets.jl").ParseFiles("templates/datasets.jl"))
+
+func (d *Dataset) Julia(out io.Writer) error {
+	return juliaTemplate.Execute(out, d)
 }
 
 func NormalizeName(name string) string {
