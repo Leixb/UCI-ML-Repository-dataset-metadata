@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/url"
 	"strings"
 	"text/template"
@@ -196,10 +197,40 @@ func (d *Dataset) Toml(out io.Writer) error {
 	return metadataTemplate.Execute(out, d)
 }
 
-var juliaTemplate = template.Must(template.New("datasets.jl").ParseFiles("templates/datasets.jl"))
+func toSciType(t string) string {
+	switch t {
+	case "Binary":
+		return "Finite{2}"
+	case "Integer":
+		return "Count"
+	case "Categorical":
+		return "Multiclass"
+	case "Continuous":
+		return "Continuous"
+	default:
+		log.Println("Unknown type:", t)
+		return t
+	}
+}
+
+var juliaTemplate = template.Must(template.New("datasets.jl").Funcs(
+	template.FuncMap{
+		"toSciType": toSciType,
+		"toCamel":   strcase.ToCamel,
+	},
+).ParseFiles("templates/datasets.jl"))
 
 func (d *Dataset) Julia(out io.Writer) error {
 	return juliaTemplate.Execute(out, d)
+}
+
+func (d *Dataset) HasIDAttribute() bool {
+	for _, attr := range d.Attributes {
+		if attr.Role == "ID" {
+			return true
+		}
+	}
+	return false
 }
 
 func NormalizeName(name string) string {

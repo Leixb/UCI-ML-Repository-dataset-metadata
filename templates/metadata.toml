@@ -1,8 +1,8 @@
 ################################################################################
 [{{.NormSlug}}]
 url = "{{.ZipURL}}"
+stripRoot = false
 sha256 = ""
-
 [{{.NormSlug}}.meta]
 title = "{{.Name}}"
 description = "{{.Abstract}}"
@@ -10,5 +10,9 @@ doi = "{{.DOI}}"
 kind = "{{.Task}}"
 year = {{.YearCreated}}
 home = "{{.HomeURL}}"
-family = "{{.Area}}"
+family = "UCI"
+field = "{{.Area}}"
+nattr = {{.NumAttributes}}
+ninst = {{.NumInstances}}
+creators = [{{range $i, $e := .DatasetCreators}}{{if $i}}, {{end}}"{{$e.Creators.FirstName}} {{$e.Creators.LastName}}"{{end}}]
 
