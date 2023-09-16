@@ -43,7 +43,7 @@
             runtimeInputs = with pkgs; [ curl ];
 
             text = ''
-              export FILE="./data.json"
+              export FILE="${./data.json}"
               export UCIML="${pkgs.lib.getExe uciml}"
 
               ${builtins.readFile ./interactive_generator.sh}

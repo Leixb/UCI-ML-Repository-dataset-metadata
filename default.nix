@@ -17,6 +17,6 @@ buildGoModule {
     homepage = "https://github.com/Leixb/UCI-ML-Repository-dataset-metadata/";
     # license = licenses.unfree; # FIXME: nix-init did not found a license
     maintainers = with maintainers; [ ];
-    mainProgram = "uci-ml-repository-dataset-metadata";
+    mainProgram = "uciml";
   };
 }
