@@ -13,19 +13,20 @@
 #-------------------------------------------------------------------------------
 # # Attribute Information
 # {{range .Attributes}}{{if ne .Name " "}}
-# - {{.Name}}: ({{.Type}} {{.Role}}) {{.Description}}{{end}}{{end}}
+# - {{.Name}}: ({{.Type}} {{.Role}}) {{.Description}}.{{end}}{{end}}
 #
 ################################################################################
-@dataset {{.TaskName}} {{.Camel}} datasetdir("{{.NormSlug}}") {{if .AttrsAreAllOK}} [
+{{ $dataset := .Name | toCamel }}{{ $attrs_ok := .AttrsAreAllOK }}
+@dataset {{.TaskName}} {{$dataset}} datasetdir("{{.NormSlug}}") {{if $attrs_ok}} [
     {{range .Attributes}} :{{.Name | toCamel}}, {{end}}
-] {{else}} false {{end}} :{{.Target}}
-{{if and .AttrsAreAllOK .NeedsCoercion}}
-preprocess(::{{.Camel}}) = X -> coerce(X, {{range .CoerceAttrs}}
-    :{{.Name | toCamel}} => {{.Type | toSciType }}, {{end}}
+] {{else}} false {{end}} :{{.Target | toCamel}}
+{{if and $attrs_ok .NeedsCoercion}}
+preprocess(::{{$dataset}}) = X -> coerce(X, {{range .CoerceAttrs}}
+    :{{.Name | toCamel}} => {{.Type | toSciType }},{{end}}
 ){{end}}
 {{if .HasIDAttribute}}
-drop_colums(::{{.Camel}}) = [{{range .Attributes}}{{if eq .Role "ID"}}:{{.Name | toCamel}}, {{end}}{{end}}]
+drop_colums(::{{$dataset}}) = [{{range .Attributes}}{{if eq .Role "ID"}}:{{.Name | toCamel}}, {{end}}{{end}}]
 {{end}}
-url(::{{.Camel}}) = "{{.HomeURL}}"
-doi(::{{.Camel}}) = "{{.DOI}}"
+url(::{{$dataset}}) = "{{.HomeURL}}"
+doi(::{{$dataset}}) = "{{.DOI}}"
 

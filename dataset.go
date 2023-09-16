@@ -128,10 +128,6 @@ func (dataset *Dataset) NormSlug() string {
 	return NormalizeName(dataset.Slug)
 }
 
-func (d *Dataset) Camel() string {
-	return strcase.ToCamel(d.Name)
-}
-
 func (d *Dataset) Target() string {
 	for _, attr := range d.Attributes {
 		if attr.Role == "Target" {
@@ -224,6 +220,30 @@ func (d *Dataset) Julia(out io.Writer) error {
 	return juliaTemplate.Execute(out, d)
 }
 
+var markdownTemplate = template.Must(template.New("markdown.md").Funcs(
+	template.FuncMap{
+		"toSciType": toSciType,
+		"toCamel":   strcase.ToCamel,
+	},
+).ParseFiles("templates/markdown.md"))
+
+func (d *Dataset) Export(out io.Writer, format string) error {
+	switch format {
+	case "julia":
+		return d.Julia(out)
+	case "toml":
+		return d.Toml(out)
+	case "markdown":
+		return d.Markdown(out)
+	default:
+		return fmt.Errorf("Unknown format: %s", format)
+	}
+}
+
+func (d *Dataset) Markdown(out io.Writer) error {
+	return markdownTemplate.Execute(out, d)
+}
+
 func (d *Dataset) HasIDAttribute() bool {
 	for _, attr := range d.Attributes {
 		if attr.Role == "ID" {
@@ -244,4 +264,30 @@ func NormalizeName(name string) string {
 		}
 	}
 	return strings.ToLower(result)
+}
+
+func (d *Dataset) HasMissingAttributes() bool {
+	for _, attr := range d.Attributes {
+		if attr.MissingValues {
+			return true
+		}
+	}
+	return false
+}
+
+func (d *Dataset) String(method string) (string, error) {
+	strWriter := new(strings.Builder)
+	var function func(io.Writer) error
+	if method == "julia" {
+		function = d.Julia
+	} else if method == "toml" {
+		function = d.Toml
+	} else {
+		function = d.Markdown
+	}
+	err := function(strWriter)
+	if err != nil {
+		return "", err
+	}
+	return strWriter.String(), nil
 }
