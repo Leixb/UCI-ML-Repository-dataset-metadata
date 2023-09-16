@@ -21,7 +21,7 @@
     {{range .Attributes}} :{{.Name | toCamel}}, {{end}}
 ] {{else}} false {{end}} :{{.Target | toCamel}}
 {{if and $attrs_ok .NeedsCoercion}}
-preprocess(::{{$dataset}}) = X -> coerce(X, {{range .CoerceAttrs}}
+preprocess(::{{$dataset}}) = X -> {{ if .HasMissingAttributes }} dropmissing(X) |> {{end}} coerce(X, {{range .CoerceAttrs}}
     :{{.Name | toCamel}} => {{.Type | toSciType }},{{end}}
 ){{end}}
 {{if .HasIDAttribute}}
