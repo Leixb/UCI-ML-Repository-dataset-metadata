@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"io"
 	"log"
@@ -187,7 +188,10 @@ func (d *Dataset) CoerceAttrs() []Attribute {
 	return result
 }
 
-var metadataTemplate = template.Must(template.New("metadata.toml").ParseFiles("templates/metadata.toml"))
+//go:embed templates/*
+var embededFS embed.FS
+
+var metadataTemplate = template.Must(template.New("metadata.toml").ParseFS(embededFS, "templates/metadata.toml"))
 
 func (d *Dataset) Toml(out io.Writer) error {
 	return metadataTemplate.Execute(out, d)
@@ -214,7 +218,7 @@ var juliaTemplate = template.Must(template.New("datasets.jl").Funcs(
 		"toSciType": toSciType,
 		"toCamel":   strcase.ToCamel,
 	},
-).ParseFiles("templates/datasets.jl"))
+).ParseFS(embededFS, "templates/datasets.jl"))
 
 func (d *Dataset) Julia(out io.Writer) error {
 	return juliaTemplate.Execute(out, d)
@@ -225,7 +229,7 @@ var markdownTemplate = template.Must(template.New("markdown.md").Funcs(
 		"toSciType": toSciType,
 		"toCamel":   strcase.ToCamel,
 	},
-).ParseFiles("templates/markdown.md"))
+).ParseFS(embededFS, "templates/markdown.md"))
 
 func (d *Dataset) Export(out io.Writer, format string) error {
 	switch format {
