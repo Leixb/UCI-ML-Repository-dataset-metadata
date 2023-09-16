@@ -26,3 +26,4 @@ go.work
 !templates/*
 uciml
 generated
+result

@@ -34,6 +34,23 @@
           inherit (self.checks.${system}.pre-commit-check) shellHook;
         };
 
+        packages = rec {
+          uciml = pkgs.callPackage ./default.nix { };
+
+          uciml-gen = pkgs.writeShellApplication {
+            name = "uciml-gen";
+
+            runtimeInputs = with pkgs; [ curl ];
+
+            text = ''
+              export FILE="./data.json"
+              export UCIML="${pkgs.lib.getExe uciml}"
+
+              ${builtins.readFile ./interactive_generator.sh}
+            '';
+          };
+        };
+
         checks.pre-commit-check = pre-commit-hooks.lib.${system}.run {
           src = ./.;
 
