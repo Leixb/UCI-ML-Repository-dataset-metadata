@@ -11,6 +11,9 @@ type Options struct {
 	DoJulia bool
 	DoToml  bool
 	Verbose bool
+
+	JuliaFilename string
+	TomlFilename  string
 }
 
 func main() {
@@ -22,6 +25,8 @@ func main() {
 	flag.BoolVar(&options.DoJulia, "julia", false, "Export to Julia")
 	flag.BoolVar(&options.DoToml, "toml", false, "Export to TOML")
 	flag.BoolVar(&options.Verbose, "verbose", false, "Verbose output")
+	flag.StringVar(&options.JuliaFilename, "julia-filename", "generated/datasets.jl", "Julia output filename")
+	flag.StringVar(&options.TomlFilename, "toml-filename", "generated/metadata.toml", "TOML output filename")
 	flag.Parse()
 
 	if len(flag.Args()) == 0 {

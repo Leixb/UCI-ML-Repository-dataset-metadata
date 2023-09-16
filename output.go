@@ -9,13 +9,13 @@ import (
 
 func output(opts Options, datasets []Dataset, report Report) error {
 	if opts.DoJulia {
-		err := export_dataset_list(datasets, "datasets.jl", "julia")
+		err := export_dataset_list(datasets, opts.JuliaFilename, "julia")
 		if err != nil {
 			return err
 		}
 	}
 	if opts.DoToml {
-		err := export_dataset_list(datasets, "metadata.toml", "toml")
+		err := export_dataset_list(datasets, opts.TomlFilename, "toml")
 		if err != nil {
 			return err
 		}
