@@ -149,10 +149,10 @@ func (d *Dataset) Target() string {
 
 func (d *Dataset) TaskName() string {
 	if strings.Contains(d.Task, "Regression") {
-		return "Regression"
+		return "RegressionDataSet"
 	}
 	if strings.Contains(d.Task, "Classification") {
-		return "Classification"
+		return "CategoricalDataSet"
 	}
 	return "Other"
 }
