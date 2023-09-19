@@ -3,7 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"github.com/gin-gonic/gin"
 	"github.com/iancoleman/strcase"
@@ -64,7 +69,31 @@ func serve(datasets []Dataset) {
 
 	attachEndpoints(r, cache)
 
-	r.Run()
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: r,
+	}
+
+	quit := make(chan os.Signal)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-quit
+		log.Println("receive interrupt signal")
+		if err := server.Close(); err != nil {
+			log.Fatal("Server Close:", err)
+		}
+	}()
+
+	if err := server.ListenAndServe(); err != nil {
+		if err == http.ErrServerClosed {
+			log.Println("Server closed under request")
+		} else {
+			log.Fatal("Server closed unexpectedly")
+		}
+	}
+
+	log.Println("Server exiting")
 }
 
 func attachEndpoints(r *gin.Engine, cache *ServerCache) {
