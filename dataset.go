@@ -191,7 +191,7 @@ func (d *Dataset) CoerceAttrs() []Attribute {
 //go:embed templates/*
 var embededFS embed.FS
 
-var metadataTemplate = template.Must(template.New("metadata.toml").ParseFS(embededFS, "templates/metadata.toml.tmpl"))
+var metadataTemplate = template.Must(template.New("metadata.toml.tmpl").ParseFS(embededFS, "templates/metadata.toml.tmpl"))
 
 func (d *Dataset) Toml(out io.Writer) error {
 	return metadataTemplate.Execute(out, d)
@@ -213,7 +213,7 @@ func toSciType(t string) string {
 	}
 }
 
-var juliaTemplate = template.Must(template.New("datasets.jl").Funcs(
+var juliaTemplate = template.Must(template.New("datasets.jl.tmpl").Funcs(
 	template.FuncMap{
 		"toSciType": toSciType,
 		"toCamel":   strcase.ToCamel,
@@ -224,7 +224,7 @@ func (d *Dataset) Julia(out io.Writer) error {
 	return juliaTemplate.Execute(out, d)
 }
 
-var markdownTemplate = template.Must(template.New("markdown.md").Funcs(
+var markdownTemplate = template.Must(template.New("markdown.md.tmpl").Funcs(
 	template.FuncMap{
 		"toSciType": toSciType,
 		"toCamel":   strcase.ToCamel,

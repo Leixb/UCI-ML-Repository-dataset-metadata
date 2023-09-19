@@ -65,7 +65,6 @@ func serve(datasets []Dataset) {
 	r.SetTrustedProxies([]string{"127.0.0.1"})
 
 	cache := NewServerCache(datasets)
-	datasets = nil
 
 	attachEndpoints(r, cache)
 
@@ -89,6 +88,7 @@ func serve(datasets []Dataset) {
 		if err == http.ErrServerClosed {
 			log.Println("Server closed under request")
 		} else {
+			log.Println(err)
 			log.Fatal("Server closed unexpectedly")
 		}
 	}
