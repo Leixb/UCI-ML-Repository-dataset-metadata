@@ -22,6 +22,7 @@
           name = "go";
 
           buildInputs = with pkgs; [
+            air
             go
             gopls
             gotools

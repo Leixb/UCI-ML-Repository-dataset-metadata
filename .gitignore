@@ -27,3 +27,6 @@ go.work
 uciml
 generated
 result
+
+tmp/
+build-errors.log
